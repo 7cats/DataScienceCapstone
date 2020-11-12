@@ -1,0 +1,150 @@
+---
+title: "Capstone_week2"
+author: "ZixinZhang"
+date: "10/11/2020"
+output: html_document
+---
+<style type = "text/css">
+
+h1,h4{
+text-align: center
+}
+</style>
+
+### Introdution
+
+This report provides a simple summary and analysis of data retrieved by https://d396qusza40orc.cloudfront.net/dsscapstone/dataset/Coursera-SwiftKey.zip from a corpus called HC Corpora. This dataset includes texts from three source(Twitter, Blog and News) in four languages, and only text in English is used in this study.  
+This report has four parts:
+1) A summary of data from three sources  
+2) An exploratory data analysis of data  
+3) A conclusion of findings  
+4) An appendix including code that generates this report
+
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+    echo = FALSE,
+    warning = FALSE,
+    message = FALSE,
+    cache = TRUE)
+
+library(tidyr)
+library(tm)
+library(stringr)
+library(ggplot2)
+library(dplyr)
+library(kableExtra)
+
+set.seed(125)
+```
+
+### Basic summarisation
+```{r download and read data}
+# setwd('D:/Coursera/Datascience/Capstone')
+url = 'https://d396qusza40orc.cloudfront.net/dsscapstone/dataset/Coursera-SwiftKey.zip'
+destfile = "Coursera-SwiftKey.zip"    
+if (!file.exists(destfile)) {
+    download.file(fileURL, destfile, method="auto")
+    unzip("Coursera-SwiftKey.zip", overwrite = FALSE)}
+
+con <- file("final/en_US/en_US.twitter.txt", "r")
+enTwitter <- readLines(con, -1)
+close(con)
+con <- file("final/en_US/en_US.blogs.txt", "r")
+enBlogs <- readLines(con, -1)
+close(con)
+con <- file("final/en_US/en_US.news.txt", "r")
+enNews <- readLines(con, -1)
+close(con)
+```
+
+```{r basic summary of the data}
+## sum entry and size
+sumAll <- data.frame(Entry = c(length(enTwitter),length(enBlogs),length(enNews)),
+                     Size = c(object.size(enTwitter),object.size(enBlogs),object.size(enNews))) %>%
+    mutate(Size = round(Size/1e06,2))
+row.names(sumAll) = c('Twitter', 'Blog', 'News')
+## making table
+sumAll %>%
+  kbl() %>%
+  kable_paper(bootstrap_options = "striped", full_width = F)
+    
+```
+As we can see in the table, Twitter has the most elements and largest file size. Blogs comes next and the News the last. As we can see, the number of elements of the Twitter is more than twice the number of Blog, but the size of file of twitter is only slightly larger that the size of Blogs. So we could draw the conclusion that the the average length of entry from Twitter is much shorter than average length of entry from blogs.
+This conclusion is also proved in the figure below:
+```{r basic analysis of the data}
+countLineWords <- function(data, sampleSize)
+{   
+    ## sample the dataset of each category
+    dataSample = data[sample(c(1:length(data)), size = sampleSize, replace = F)]
+    ## split line by .?! and count
+    line = grep('[[:alnum:]]', unlist(strsplit(dataSample, '\\.|\\!|\\?')), value = T)
+    lineCount = length(line)
+    ## split words and count
+    word <- tolower(unlist(sapply(dataSample, function(x) {str_extract_all(x,"[[:alnum:]]+")}), use.names = F))
+    wordUnique <- data.frame(table(word))
+    wordOrder <- sort(wordUnique$Freq, decreasing = T, index.return = T)
+    wordCount <- mutate(data.frame( wordSort = wordUnique$word[wordOrder$ix], times = wordOrder$x), freq = times/length(word))
+    ## return result
+    result <- list("line" = line, "lineCount" = lineCount, "words" = word, "wordCount" = wordCount)
+    return(result)
+}
+
+phraseList <- list(Twitter = enTwitter,Blogs = enBlogs,News = enNews)
+sampleSize <-  20000
+cleanResult <- lapply(phraseList, function(x) countLineWords(x,sampleSize = sampleSize))
+
+dataCount <- data.frame(lineCounts = c(cleanResult$Twitter$lineCount,
+                                       cleanResult$Blogs$lineCount,
+                                       cleanResult$News$lineCount),
+                        wordCounts = c(length(cleanResult$Twitter$words),
+                                       length(cleanResult$Blogs$words),
+                                       length(cleanResult$News$words))) %>%
+    mutate(media = c("twitter", "Blogs", "News"), 
+           lineCounts = lineCounts/sampleSize, 
+           wordCounts = wordCounts/sampleSize) %>%
+    gather(key = type, value = counts, - media)
+
+twitterTopTen = data.frame(word = head(cleanResult$Twitter$wordCount$word,10), freq  = head(cleanResult$Twitter$wordCount$freq,10))
+blogTopTen = data.frame(word = head(cleanResult$Blogs$wordCount$word,10), freq  = head(cleanResult$Blogs$wordCount$freq,10))
+newsTopTen = data.frame(word = head(cleanResult$News$wordCount$word,10), freq  = head(cleanResult$News$wordCount$freq,10))
+dataTopTen <- list(twitter = twitterTopTen, blog = blogTopTen, news = newsTopTen)
+```
+```{r presenting result, fig.align="center", fig.height = 2, fig.width = 5}
+gCount <- ggplot(dataCount, aes(x = media, y = counts, fill = media)) + 
+    geom_bar(stat = "identity", position = position_dodge()) + 
+    labs(title = 'Averaged number of line and word of three medias') + 
+    facet_grid(type ~. , scales = "free")
+gCount
+```
+This figure is the summrisation of the average number of lines for each entry from each source. It is important to notice that this is calculated from `r sampleSize/1000`k samples for each source. For these three sources, blogs has the highest values of number of lines and number of words, and the news scored second and twitter has the least numbers of both lines and words. Again this shows that the blogs and news tends to have long sentences and texts on twitter are short.
+
+### Most frequently used words
+```{r presensting result section 2, fig.align="center", fig.height = 2, fig.width = 5}
+gTopTen <- lapply(dataTopTen, function(dataMedia) 
+    {g <- ggplot(dataMedia, aes(x = reorder(word, -freq), y = freq, fill = reorder(word, -freq))) + 
+    geom_bar(stat = "identity",show.legend = FALSE)  + 
+    scale_fill_grey() +
+    labs(x = 'word', y = 'frequency') +
+    theme(plot.title = element_text(hjust = 0.5),
+          axis.text.x  = element_text(size = 14)) + 
+    ylim(c(0, max(dataTopTen$twitter$freq, dataTopTen$blog$freq, dataTopTen$news$freq)))
+    }) 
+
+gTopTen$twitter + labs(title = 'Top ten most frequently used words in Twitter')
+gTopTen$blog + labs(title = 'Top ten most frequently used words in Blogs')
+gTopTen$news + labs(title = 'Top ten most frequently used words in News')
+
+```
+Most frequently used words of these three sources are presented in the figures. We could draw some conclusions:   
+1) The word ***the*** has the highest frequency of all media sources, but with much higher frequencies for News and Blogs than Twitter. It indicates that when people are writing on Twitter, they give less attention to using grammar correctly.    
+2) The **personal pronoun** ***I***, ***you*** appear much more times in Text from Twitter than the other media source. It is also expected since people tends to talk about themselves on Twitter.  
+3) The single alphabet ***s*** has a quite high frequency in the text of News, which is worth to being looked into. The reason should be from some incorrectly processing of the language.  
+
+
+
+### Appendix Code
+```{r ref.label=knitr::all_labels(), echo = TRUE, eval=FALSE}
+```
+
+
