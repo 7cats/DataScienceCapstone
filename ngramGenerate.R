@@ -33,65 +33,11 @@ close(con)
 ###----- Testing and Training model -----###
 
 textAll <- c(enTwitter, enBlogs, enNews)
-samplePercent = 0.005
+samplePercent = 0.05
 textSample <- textAll[sample(c(1:length(textAll)), size = length(textAll)*samplePercent, replace = F)]
 indexTrain <- sample(c(1:length(textSample)), size = length(textSample)*0.8, replace = F)
 textTrain <- textSample[indexTrain]
 textTest <- textSample[-indexTrain]
-
-getNgram <- function(corpus, ngram)
-{
-    BigramTokenizer <- function(x) NGramTokenizer(x, Weka_control(min = 2, max = 2))
-    TrigramTokenizer <- function(x) NGramTokenizer(x, Weka_control(min = 3, max = 3))
-    QuadgramTokenizer <- function(x) NGramTokenizer(x, Weka_control(min = 4, max = 4))
-    
-    ngramTextTDM <- switch (as.String(ngram),
-                            '2' = TermDocumentMatrix(corpus, control = list(tokenize = BigramTokenizer)),
-                            '3' = TermDocumentMatrix(corpus, control = list(tokenize = TrigramTokenizer)),
-                            '4' = TermDocumentMatrix(corpus, control = list(tokenize = QuadgramTokenizer)),
-                            stop("Only 2,3 and 4 are used for ngram model")
-    )
-    
-    ngramMatrx <- as.matrix(counts = ngramTextTDM)
-    returnList <- list(ngramTextTDM, ngramMatrx)
-}
-
-getNgramTokenMatrix <- function(DF, N_Gram)
-{
-    gramStr <- row.names(DF)
-    splitGram <- str_split(gramStr,' ')
-    tokens <- data.frame(matrix(unlist(splitGram), nrow =length(splitGram), byrow = T))
-    
-    colnames(tokens) <- switch (as.String(N_Gram),
-                                '2' = c('g1', 'g2'),
-                                '3' = c('g1', 'g2', 'g3'),
-                                '4' = c('g1', 'g2', 'g3', 'g4'))
-    
-    tokens <- data.frame(tokens) %>%
-        mutate(counts = matrix(DF)) %>%
-        group_by(g1)
-}
-
-preprocessData <- function(data, N_Gram)
-{
-    ## pre-process: remove excess blanks, lower all letters, remove non-alphabet text
-    dataPostPro = stripWhitespace(
-        tolower(
-            gsub('[^\x01-\x7F]+', '',
-                 gsub('[^[:alpha:][:blank:]]','', unlist(strsplit(data, '\\.+|\\!+|\\?+|\\,+'))))))
-    
-    ## transform to TDM format and Matrix format
-    cat(dataPostPro, file = "final/en_US/sample.txt",sep = "\n")
-    fileDirSource <- DirSource("final/en_US/", pattern = "sample.txt")
-    textCorpus <- VCorpus(fileDirSource, readerControl = list(language = "English"))
-    textTdmMatrix <- getNgram(textCorpus, N_Gram)
-    tokenMatrix <- getNgramTokenMatrix(data.frame(textTdmMatrix[[2]]), N_Gram)
-    
-    ##
-    returnList <- list(textPostPro = dataPostPro, 
-                       textTDM = textTdmMatrix[[1]], 
-                       ngramMatrx = tokenMatrix)
-}
 
 N_Gram <- c(2:4)
 for (n in N_Gram)
@@ -100,6 +46,7 @@ for (n in N_Gram)
     assign(varName, preprocessData(textTrain, n))
 
 }
+textMatrixAll <- list(text2Gram$ngramMatrx, text3Gram$ngramMatrx, text4Gram$ngramMatrx)
 
 ##### findAssocs(crudeTDM, "oil", 0.85)
 

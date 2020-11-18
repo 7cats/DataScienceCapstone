@@ -19,16 +19,14 @@ getNgramTokenMatrix <- function(DF, N_Gram)
 {
     gramStr <- row.names(DF)
     splitGram <- str_split(gramStr,' ')
-    tokens <- data.frame(matrix(unlist(splitGram), nrow =length(splitGram), byrow = T))
+    tokens <- data.frame(matrix(unlist(splitGram), nrow =length(splitGram), byrow = T)) %>%
+              cbind(., counts = DF)
     
-    colnames(tokens) <- switch (as.String(N_Gram),
-                                '2' = c('g1', 'g2'),
-                                '3' = c('g1', 'g2', 'g3'),
-                                '4' = c('g1', 'g2', 'g3', 'g4'))
-    
-    tokens <- data.frame(tokens) %>%
-        cbind(.,counts = DF) %>%
-        group_by(g1)
+    colnames(tokens) <- switch(as.String(N_Gram),
+                                '2' = c('g1', 'g2', 'counts'),
+                                '3' = c('g1', 'g2', 'g3', 'counts'),
+                                '4' = c('g1', 'g2', 'g3', 'g4', 'counts'))
+    return(tokens)
 }
 
 preprocessData <- function(data, N_Gram)
