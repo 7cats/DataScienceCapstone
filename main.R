@@ -1,11 +1,11 @@
-#### test code of the tm package
 ## dataset source
 # url = "http://kdd.ics.uci.edu/databases/reuters21578/reuters21578.html"
 
+setwd('d:/Coursera/DataScience/Capstone/')
 library(tm)
 library(Stem)
 library(RWeka)
-# library(quanteda)
+library(markovchain)
 library(tidyr)
 library(stringr)
 library(ggplot2)
@@ -33,20 +33,37 @@ close(con)
 ###----- Testing and Training model -----###
 
 textAll <- c(enTwitter, enBlogs, enNews)
-samplePercent = 0.05
+samplePercent = 0.005
 textSample <- textAll[sample(c(1:length(textAll)), size = length(textAll)*samplePercent, replace = F)]
 indexTrain <- sample(c(1:length(textSample)), size = length(textSample)*0.8, replace = F)
 textTrain <- textSample[indexTrain]
 textTest <- textSample[-indexTrain]
 
-N_Gram <- c(2:4)
+N_Gram <- c(1:4)
 for (n in N_Gram)
 {
     varName <- paste("text", n, 'Gram', sep = "")
     assign(varName, preprocessData(textTrain, n))
 
 }
-textMatrixAll <- list(text2Gram$ngramMatrx, text3Gram$ngramMatrx, text4Gram$ngramMatrx)
+textMatrixAll <- list(text1Gram$ngramMatrx, text2Gram$ngramMatrx, text3Gram$ngramMatrx, text4Gram$ngramMatrx)
+smoothGT <- lapply(textMatrixAll, GoodTuring)
 
-##### findAssocs(crudeTDM, "oil", 0.85)
+## Back off model
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
