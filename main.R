@@ -33,7 +33,7 @@ close(con)
 ###----- Testing and Training model -----###
 
 textAll <- c(enTwitter, enBlogs, enNews)
-samplePercent = 0.005
+samplePercent = 0.0005
 textSample <- textAll[sample(c(1:length(textAll)), size = length(textAll)*samplePercent, replace = F)]
 indexTrain <- sample(c(1:length(textSample)), size = length(textSample)*0.8, replace = F)
 textTrain <- textSample[indexTrain]
@@ -50,6 +50,7 @@ textMatrixAll <- list(text1Gram$ngramMatrx, text2Gram$ngramMatrx, text3Gram$ngra
 smoothGT <- lapply(textMatrixAll, GoodTuring)
 
 ## Back off model
+
 
 
 

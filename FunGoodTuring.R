@@ -54,11 +54,10 @@ GoodTuring <- function(textMatrix)
         else 
             if(abs(cStarLGT-cStarTE)[r]*r/turingSD[r] > 1.65)
                 cStarcmbrel[r] <- cStarTE[r]
-            else
-            {
+            else{
                 useTuring <- FALSE
                 cStarcmbrel[r] <- cStarLGT[r]}
-            }
+    }
     
     ## renormalize the probabilities for observed objects
     sumProbRaw <- sum(cStarcmbrel*Counts*Nc/N)
