@@ -32,24 +32,29 @@ getNgramTokenMatrix <- function(DF, N_Gram)
     return(tokens)
 }
 
-
-preprocessData <- function(data, N_Gram)
+cleanText <- function(data)
 {
     ## pre-process: remove excess blanks, lower all letters, remove non-alphabet text
     dataPostPro <-  stripWhitespace(
         tolower(
             # sub duplicated characters like happyyyyy -> happy
             gsub('([[:alpha:]])\\1{2,}', '\\1',
-            # sub non-en characters
-            gsub('[^\x01-\x7F]+', '',
-            # 
-            gsub('[^[:alpha:][:blank:]]','', 
-            # delete meaningless hashtag in twitter
-            gsub("\\#[[:alnum:]]+", '',
-                 unlist(strsplit(data, '\\.+|\\!+|\\?+|\\,+'))))))))
+                 # sub non-en characters and profanity
+                 gsub('[^\x01-\x7F]+|wtf|[a-z]*fuck[a-z]*|lol|[a-z]*bitch[a-z]*|[a-z]*cunt[a-z]*', '',
+                      # 
+                      gsub('[^[:alpha:][:blank:]]','', 
+                           # delete meaningless hashtag in twitter
+                           gsub("\\#[[:alnum:]]+", '',
+                                unlist(strsplit(data, '\\.+|\\!+|\\?+|\\,+'))))))))
+    return(dataPostPro)
+}
+
+
+preprocessData <- function(data, N_Gram)
+{
+    dataPostPro <- cleanText(cleanText(data))
     # remove blank element or element with only one word
     dataPostPro <- dataPostPro[grepl('[a-z]\\s[a-z]', dataPostPro)]
-    
     ## transform to TDM format and Matrix format
     cat(dataPostPro, file = "final/en_US/sample.txt",sep = "\n")
     fileDirSource <- DirSource("final/en_US/", pattern = "sample.txt")

@@ -68,6 +68,7 @@ GoodTuring <- function(textMatrix)
     goodTuring <- goodTuring %>%
         mutate(cStar = c(Nc[2]/N, Counts*cStarcmbrel),
                pStar = cStar*Nc/N,
-               NcZest = c(Nc[1],NcZest))
+               NcZest = c(Nc[1],NcZest),
+               pAve = cStar/N)
     return(goodTuring)
 }
