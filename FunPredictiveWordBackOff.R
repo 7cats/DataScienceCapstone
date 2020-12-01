@@ -52,7 +52,6 @@ getCount4Gram <- function(gramsRaw, textMatrixAll, smoothGT, returnNum)
     if(length(existIndex) != 0)
     {
         wordList <- data.frame(counts = textMatrix$counts[existIndex],
-                               index = existIndex,
                                word = textMatrix$g4[existIndex])
         wordList$prob <- getProbs(wordList$counts, smoothGT[[4]])
         wordList <- wordList[order(wordList$prob, decreasing = T),]
@@ -73,7 +72,6 @@ getCount3Gram <- function(gramsRaw, textMatrixAll, smoothGT, returnNum)
     if(length(existIndex) != 0)
     {
         wordList <- data.frame(counts = textMatrix$counts[existIndex],
-                               index = existIndex,
                                word = textMatrix$g3[existIndex])
         wordList$prob <- getProbs(wordList$counts, smoothGT[[3]])
         wordList <- wordList[order(wordList$prob, decreasing = T),]
@@ -93,7 +91,6 @@ getCount2Gram <- function(gramsRaw, textMatrixAll, smoothGT, returnNum)
     if(length(existIndex) != 0)
     {
         wordList <- data.frame(counts = textMatrix$counts[existIndex],
-                               index = existIndex,
                                word = textMatrix$g2[existIndex])
         wordList$prob <- getProbs(wordList$counts, smoothGT[[2]])
         wordList <- wordList[order(wordList$prob, decreasing = T),]
@@ -110,9 +107,6 @@ getCount2Gram <- function(gramsRaw, textMatrixAll, smoothGT, returnNum)
 getCount1Gram <- function(gram, textMatrix, smoothGT1Gram, returnNum)
 {
     smoothGT1Gram <- smoothGT1Gram[sort(smoothGT1Gram$pAve,decreasing = T, index.return = T)$ix,]
-    # textMatrix <- textMatrix[sort(textMatrix$counts, decreasing = T, index.return = T)$ix,]
-    # WordList <- data.frame(word = textMatrix$g1[1:returnNum],
-    #                        counts = textMatrix$counts[1:returnNum])
     sumCount <- NULL
     for(i in 1:dim(smoothGT1Gram)[1])
     {
@@ -126,8 +120,6 @@ getCount1Gram <- function(gram, textMatrix, smoothGT1Gram, returnNum)
                           matrix(rep(t(c(smoothGT1Gram$counts[n],smoothGT1Gram$pAve[n])),
                                        times = smoothGT1Gram$Nc[n]),
                                  nrow = smoothGT1Gram$Nc[n], byrow = T))
-    # wordList <- data.frame(counts = smoothGT1Gram$counts[1:splitPoint],
-    #                        prob = smoothGT1Gram$pAve[1:splitPoint])
     }
     colnames(wordList) <- c('count','prob')
     words <- NULL

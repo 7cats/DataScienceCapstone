@@ -102,7 +102,7 @@ gTopTen <- list(
 ###----- Testing and Training model -----###
 
 textAll <- c(enTwitter, enBlogs, enNews)
-samplePercent = 0.1
+samplePercent = 0.02
 textSample <- textAll[sample(c(1:length(textAll)), size = length(textAll)*samplePercent, replace = F)]
 indexTrain <- sample(c(1:length(textSample)), size = length(textSample)*0.8, replace = F)
 textTrain <- textSample[indexTrain]
@@ -116,9 +116,11 @@ for (n in N_Gram)
 
 }
 textMatrixAll <- list(text1Gram$ngramMatrx, text2Gram$ngramMatrx, text3Gram$ngramMatrx, text4Gram$ngramMatrx)
+
 smoothGT <- lapply(textMatrixAll, GoodTuring)
 
-save(dataTopTen, dataCount, textMatrixAll, smoothGT, file = 'allData.RData')
+for(i in N_Gram) row.names(textMatrixAll[[i]]) <- NULL
+save(dataTopTen, dataCount, textMatrixAll, smoothGT, file = 'allData2.RData')
 save(gTopTen, gCount, file = 'allFigures.RData')
 
 

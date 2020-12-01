@@ -40,7 +40,7 @@ cleanText <- function(data)
             # sub duplicated characters like happyyyyy -> happy
             gsub('([[:alpha:]])\\1{2,}', '\\1',
                  # sub non-en characters and profanity
-                 gsub('[^\x01-\x7F]+|wtf|[a-z]*fuck[a-z]*|lol|[a-z]*bitch[a-z]*|[a-z]*cunt[a-z]*|\\s[b-z]\\s', '',
+                 gsub('[^\x01-\x7F]+|wtf|[a-z]*fuck[a-z]*|lol|[a-z]*bitch[a-z]*|[a-z]*cunt[a-z]*|\\s[b-hj-z]\\s', ' ',
                       # 
                       gsub('[^[:alpha:][:blank:]]','', 
                            # delete meaningless hashtag in twitter
