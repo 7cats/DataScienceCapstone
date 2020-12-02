@@ -1,0 +1,74 @@
+---
+title: "PredictNextWord"
+author: "ZixinZhang"
+date: "02/12/2020"
+output: ioslides_presentation
+---
+
+
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+    echo = FALSE,
+    message = FALSE,
+    warning = FALSE,
+    cache = TRUE)
+
+load("D:/Coursera/DataScience/Capstone/dataSummary.RData")
+library(ggplot2)
+library(dplyr)
+library(kableExtra)
+```
+
+## Introduction
+
+#### This is a introduction of the project **PredictNextWord**, which includes these parts:  
+    
+1. Introduction the data  
+  
+2. Summary of the data  
+  
+3. Shiny APP functions
+
+##### The full code for the algorithm and reports could be found in:
+https://github.com/7cats/DataScienceCapstone
+
+## Introduction the data
+
+- Meta data are corpus extracted from three media: **Twitter**, **Blog**, **News** in four languages(Only English corpus is used in these project).  
+- Data are provided by:     
+   https://d396qusza40orc.cloudfront.net/dsscapstone/dataset/Coursera-SwiftKey.zip  
+- A small summary of the original data:  
+  
+```{r}
+## making table
+colnames(sumAll) = c('Lines', 'Size(mb)')
+sumAll %>%
+  kbl() %>%
+  kable_paper(bootstrap_options = "striped", full_width = F)
+```
+
+## Algorithm
+The algorithm process the data in the following steps:
+    
+1. Clean the text, which includes:  
+- Remove numbers, non-English alphabet letter, punctuations and profanity     
+- Break text into sentences  
+- Strip white spaces    
+2. Generate n-gram(n = [1,4]) TDM file and count each combination frequency   
+3. Smooth the probability of frequency with **Good Turing method** which gives words that have zero frequency a   probability    
+4. Calculate the probability of one word to following previous sentences based on its counts  
+
+
+## Shiny APP introduction
+##### This APP includes four parts: 
+      
+1. An introduction of the APP and the data  
+
+2. Analysis of the data from three sources
+  
+3. Predict the next word with highest probabilities
+
+4. Comparison of the probabilities between two words
+
+

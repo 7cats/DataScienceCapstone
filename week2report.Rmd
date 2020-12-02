@@ -64,6 +64,7 @@ sumAll <- data.frame(Entry = c(length(enTwitter),length(enBlogs),length(enNews))
                      Size = c(object.size(enTwitter),object.size(enBlogs),object.size(enNews))) %>%
     mutate(Size = round(Size/1e06,2))
 row.names(sumAll) = c('Twitter', 'Blog', 'News')
+colnames(sumAll) = c('Lines', 'Size(mb)')
 ## making table
 sumAll %>%
   kbl() %>%
